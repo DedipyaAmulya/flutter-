@@ -1,0 +1,26 @@
+Question 19: Develop a Flutter application that follows the Model-View-ViewModel (MVVM) pattern and has similar functionality to the default counter app in Flutter.
+SOURCE CODE:
+// lib/main.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'view/counter_view.dart';
+import 'viewmodel/counter_viewmodel.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => CounterViewModel(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'MVVM Counter App',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: CounterView(),
+      ),
+    );
+  }
+}
