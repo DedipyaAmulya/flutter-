@@ -1,0 +1,90 @@
+Question 18: Create a Flutter application that retrieves and displays user comments from the server using the API "https://jsonplaceholder.typicode.com/comments".
+The comments should include the name and email of each user.
+SOURCE CODE:
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // for json decoding
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'User Comments',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: CommentsScreen(),
+    );
+  }
+}
+
+class CommentsScreen extends StatefulWidget {
+  @override
+  _CommentsScreenState createState() => _CommentsScreenState();
+}
+
+class _CommentsScreenState extends State<CommentsScreen> {
+  // Function to fetch comments from API
+  Future<List<dynamic>> fetchComments() async {
+    final response = await http.get(
+      Uri.parse('https://jsonplaceholder.typicode.com/comments'),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body); // Convert JSON to List
+    } else {
+      throw Exception('Failed to load comments');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('User Comments')),
+      body: FutureBuilder<List<dynamic>>(
+        future: fetchComments(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No comments found.'));
+          }
+
+          final comments = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: comments.length,
+            itemBuilder: (context, index) {
+              final comment = comments[index];
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: Text(comment['name'][0].toUpperCase()),
+                  ),
+                  title: Text(comment['name'], style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(comment['email'], style: TextStyle(color: Colors.blueGrey)),
+                      SizedBox(height: 5),
+                      Text(comment['body']),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
